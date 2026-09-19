@@ -6,6 +6,7 @@
     <title>Login - Scroll Spree</title>
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/login.css">
+    <script src="/js/auth.js"></script>
 </head>
 <body class="login-page">
 
@@ -47,7 +48,7 @@
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('refreshToken', data.refreshToken);
 
-                window.location.href = '/admin/logs';
+                redirectBasedOnRole(data.token);
             } else {
                 alert("Login Failed: Invalid credentials");
             }

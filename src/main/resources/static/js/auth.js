@@ -23,7 +23,7 @@ async function fetchWithAuth(url, options = {}) {
         } else {
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
-            window.location.href = '/admin/login';
+            window.location.href = '/auth/login';
         }
     }
 
@@ -57,5 +57,5 @@ async function attemptTokenRefresh() {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
-    window.location.href = '/admin/login';
+    window.location.href = '/auth/login';
 }

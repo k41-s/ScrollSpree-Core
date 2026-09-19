@@ -1,0 +1,142 @@
+/* =========================================
+   main.css - Core Styles for Scroll Spree
+   ========================================= */
+
+:root {
+    /* Brand Colours derived from the mock-up */
+    --primary-colour: #8cc3bc;      /* Soft teal/mint */
+    --primary-hover: #75b3ab;
+    --danger-colour: #e07a7a;       /* Soft red for destructive actions */
+    --danger-hover: #c96262;
+
+    /* Background & Surface Colours */
+    --bg-main: #ffffff;
+    --bg-off-white: #f8f9fa;
+    --card-bg: #ffffff;
+
+    /* Typography Colours */
+    --text-main: #222222;
+    --text-muted: #666666;
+    --border-colour: #e2e2e2;
+
+    /* Styling Variables */
+    --border-radius-btn: 25px;      /* Pill-shaped buttons */
+    --border-radius-card: 12px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+    /* Fonts */
+    --font-sans: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-serif: 'Playfair Display', 'Times New Roman', Times, serif;
+}
+
+/* Base Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--text-main);
+    background-color: var(--bg-off-white);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: normal;
+    color: var(--text-main);
+}
+
+/* =========================================
+   Reusable Components
+   ========================================= */
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0.6rem 1.5rem;
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-btn);
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-colour);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--primary-colour);
+    border-color: var(--primary-colour);
+}
+
+.btn-outline:hover {
+    background-color: var(--primary-colour);
+    color: #ffffff;
+}
+
+.btn-danger-outline {
+    background-color: transparent;
+    color: var(--danger-colour);
+    border-color: var(--danger-colour);
+}
+
+.btn-danger-outline:hover {
+    background-color: var(--danger-colour);
+    color: #ffffff;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: var(--text-main);
+    background-color: #fafafa;
+    border: 1px solid var(--border-colour);
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-colour);
+    background-color: #ffffff;
+}
+
+/* Containers */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}

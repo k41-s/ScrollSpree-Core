@@ -1,0 +1,62 @@
+/* =========================================
+   logs.css
+   ========================================= */
+
+.logs-page {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+.logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.logs-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Table Styles */
+.table-container {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius-card);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    width: 100%;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-colour);
+}
+
+.admin-table th {
+    background-color: #fcfcfc;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+    background-color: #f9fbfb;
+}
+
+.admin-table tbody tr:last-child td {
+    border-bottom: none;
+}

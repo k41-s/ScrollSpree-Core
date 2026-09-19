@@ -1,4 +1,4 @@
-package com.k41s.scrollspree_core.controller.api;
+package com.k41s.scrollspree_core.controller.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -30,7 +30,7 @@
 
         <div class="header-actions">
 
-            <form action="/" method="GET" class="header-search" role="search">
+            <form action="/#collection" method="GET" class="header-search" role="search">
                 <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                 <label class="sr-only" for="header-search-input">Search products</label>
                 <input id="header-search-input" type="text" name="search" placeholder="Search"
@@ -48,9 +48,18 @@
                 <span class="cart-count" data-cart-count hidden>0</span>
             </a>
 
+            <!--
+              Both elements are in the markup; cart.js shows exactly one based on
+              login state. Previously cart.js rewrote this link's href with JS
+              instead, which left a stale-looking href in the markup and gave no
+              way to tell, or end, a logged-in session from the header.
+            -->
             <a href="/auth/login" class="icon-btn" data-auth-link aria-label="Sign in">
                 <i class="fa-regular fa-user"></i>
             </a>
+            <button type="button" class="icon-btn" data-logout-btn hidden aria-label="Log out">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
         </div>
     </div>
 </header>
@@ -90,7 +99,6 @@
             <div class="socials">
                 <a href="/#footer" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                 <a href="/#footer" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                <a href="/#footer" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
             </div>
         </div>
     </div>

@@ -185,15 +185,59 @@
     margin-left: auto;
 }
 
+/*
+  A bare <select> keeps its OS-drawn arrow and hover/focus chrome even once
+  everything else about it is styled, which is what read as "no styling" /
+  "a weird square block on hover" - that block was the native control's own
+  focus highlight fighting with our pill styling underneath it. appearance:
+  none removes the native control entirely; the chevron is a separate icon
+  we draw ourselves (matching .country-select), not the browser's.
+*/
+.select-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.select-wrap .select-caret {
+    position: absolute;
+    right: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
 .sort-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     font-family: inherit;
     font-size: 0.75rem;
     color: var(--text-muted);
-    padding: 0.45rem 0.8rem;
+    padding: 0.45rem 2rem 0.45rem 0.8rem;
     border: 1px solid var(--border-colour);
     border-radius: var(--border-radius-btn);
     background-color: var(--bg-main);
     cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.sort-select::-ms-expand {
+    display: none;
+}
+
+.sort-select:hover,
+.sort-select:focus {
+    border-color: var(--primary-colour);
+}
+
+/* Firefox draws its own dotted focus ring inside the text; this swaps it
+   for a transparent one so the outer :focus-visible ring above is the only
+   focus indicator, consistent with every other control on the page. */
+.sort-select:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 var(--text-muted);
 }
 
 /* Product grid */

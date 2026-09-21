@@ -13,11 +13,13 @@
         const originalLabel = labelEl ? labelEl.textContent : '';
 
         button.disabled = true;
+        ScrollSpreeCart.setButtonBusy(button, true);
         if (labelEl) labelEl.textContent = 'Adding…';
 
         try {
             await ScrollSpreeCart.addToCart(product, 1);
 
+            ScrollSpreeCart.setButtonBusy(button, false);
             if (labelEl) labelEl.textContent = 'Added';
             ScrollSpreeCart.showToast(product.name + ' added to your basket.');
 
@@ -28,6 +30,7 @@
 
         } catch (error) {
             console.error('Add to basket failed:', error);
+            ScrollSpreeCart.setButtonBusy(button, false);
             ScrollSpreeCart.showToast('That did not go through. Try again.');
             if (labelEl) labelEl.textContent = originalLabel;
             button.disabled = false;

@@ -16,7 +16,10 @@
 
     <h1 class="cart-heading">Your basket</h1>
 
-    <div id="cart-loading" class="cart-status">Loading your basket…</div>
+    <div id="cart-loading" class="cart-status">
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Loading your basket…</p>
+    </div>
 
     <div id="cart-empty" class="cart-status" hidden>
         <i class="fa-solid fa-basket-shopping"></i>
@@ -128,12 +131,17 @@
         function render(items) {
             loadingEl.hidden = true;
 
+            // Cleared unconditionally: this used to sit after the empty-state
+            // early return below, so clearing the basket left the old <li>
+            // rows sitting in the DOM under #cart-content - invisible only
+            // because contentEl.hidden happened to be set alongside them.
+            listEl.textContent = '';
+
             const isEmpty = items.length === 0;
             emptyEl.hidden = !isEmpty;
             contentEl.hidden = isEmpty;
             if (isEmpty) return;
 
-            listEl.textContent = '';
             items.forEach(item => listEl.append(buildRow(item)));
 
             totalEl.textContent = ScrollSpreeCart.formatPrice(ScrollSpreeCart.getTotal());
@@ -158,7 +166,12 @@
             }
         }
 
-        ScrollSpreeCart.subscribe(render);
+        // subscribe() invokes its listener immediately with whatever cartItems
+        // holds right now. Called this early, that's still the pre-fetch []
+        // default, so render() would show "basket is empty" for a moment even
+        // when it isn't. Waiting for the real fetch to land first (ready)
+        // means render()'s first call always reflects the actual basket.
+        ScrollSpreeCart.ready.then(() => ScrollSpreeCart.subscribe(render));
 
         document.getElementById('clear-cart').addEventListener('click', async () => {
             try {

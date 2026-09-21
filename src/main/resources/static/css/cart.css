@@ -24,6 +24,12 @@
     color: var(--primary-colour);
 }
 
+.cart-status .spinner {
+    font-size: 2rem;
+    color: var(--primary-colour);
+    opacity: 1;
+}
+
 #cart-content {
     display: grid;
     grid-template-columns: 1fr 320px;

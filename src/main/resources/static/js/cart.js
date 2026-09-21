@@ -33,7 +33,21 @@ window.ScrollSpreeCart = (function () {
     }
 
     function isLoggedIn() {
-        return Boolean(localStorage.getItem('token'));
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+
+        // auth.js's parseJwt() is already loaded by the time cart.js runs.
+        // A token can outlive a browser session in localStorage; without this
+        // check an expired-but-present token still read as "logged in" here,
+        // which is why the header could look signed-in when the person no
+        // longer had a valid session. fetchWithAuth() still owns the actual
+        // refresh-or-log-out flow for API calls; this only keeps the header
+        // and cart source (guest vs server) consistent with that.
+        const claims = typeof parseJwt === 'function' ? parseJwt(token) : null;
+        if (claims && claims.exp && claims.exp * 1000 < Date.now()) {
+            return false;
+        }
+        return true;
     }
 
     function readGuestCart() {
@@ -245,22 +259,56 @@ window.ScrollSpreeCart = (function () {
         });
     }
 
+    /**
+     * Swaps a button's icon for a spinner while an async action is in flight.
+     * icon.className is saved and restored, so this works with any FA icon
+     * without the caller needing to know or repeat the original classes.
+     */
+    function setButtonBusy(button, isBusy) {
+        const icon = button.querySelector('i');
+        if (!icon) return;
+
+        if (isBusy) {
+            if (!icon.dataset.originalClass) {
+                icon.dataset.originalClass = icon.className;
+            }
+            icon.className = 'spinner';
+        } else if (icon.dataset.originalClass) {
+            icon.className = icon.dataset.originalClass;
+            delete icon.dataset.originalClass;
+        }
+    }
+
     /* ---------------------------------------------------------
        Boot
        --------------------------------------------------------- */
 
+    // Resolves once the initial fetchCart() below has settled, so a page
+    // can await real data instead of rendering subscribe()'s first,
+    // necessarily-empty emission as if it were "the basket is empty".
+    let readyResolve;
+    const ready = new Promise(resolve => { readyResolve = resolve; });
+
     document.addEventListener('DOMContentLoaded', () => {
         subscribe(renderBadges);
 
-        // Point the account icon somewhere useful once signed in.
+        const authLink = document.querySelector('[data-auth-link]');
+        const logoutBtn = document.querySelector('[data-logout-btn]');
+
         if (isLoggedIn()) {
-            document.querySelectorAll('[data-auth-link]').forEach(link => {
-                link.setAttribute('href', '/cart');
-                link.setAttribute('aria-label', 'Your account');
+            if (authLink) authLink.hidden = true;
+            if (logoutBtn) logoutBtn.hidden = false;
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                // logout() is defined in auth.js: clears both tokens and
+                // sends the browser to /auth/login.
+                logout();
             });
         }
 
-        fetchCart();
+        fetchCart().finally(readyResolve);
     });
 
     return {
@@ -277,6 +325,8 @@ window.ScrollSpreeCart = (function () {
         syncGuestCartToApi,
         showToast,
         requireLogin,
-        formatPrice
+        formatPrice,
+        setButtonBusy,
+        ready
     };
 })();

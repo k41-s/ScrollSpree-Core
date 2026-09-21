@@ -65,34 +65,46 @@
 
         <div class="filter-bar">
             <nav class="category-pills">
+                <!--
+                  '#collection' appended to every filter/sort/pagination link on this
+                  page: full reloads are the "if it's not worth AJAX, at least land back
+                  where the person was" trade-off - cheap, and the browser handles the
+                  scroll restoration for free once the fragment is in the URL.
+                -->
                 <a class="pill"
                    th:classappend="${currentCategoryId == null} ? ' is-active'"
-                   th:href="@{/(search=${currentSearch}, sortBy=${currentSortBy}, direction=${currentDirection})}">
+                   th:href="@{/(search=${currentSearch}, sortBy=${currentSortBy}, direction=${currentDirection})} + '#collection'">
                     All
                 </a>
                 <a th:each="cat : ${categories}"
                    class="pill"
                    th:classappend="${cat.id == currentCategoryId} ? ' is-active'"
-                   th:href="@{/(categoryId=${cat.id}, search=${currentSearch}, sortBy=${currentSortBy}, direction=${currentDirection})}"
+                   th:href="@{/(categoryId=${cat.id}, search=${currentSearch}, sortBy=${currentSortBy}, direction=${currentDirection})} + '#collection'"
                    th:text="${cat.name}">Category</a>
             </nav>
 
-            <form action="/" method="GET" class="sort-form">
+            <form action="/#collection" method="GET" class="sort-form">
                 <input type="hidden" name="search" th:value="${currentSearch}">
                 <input type="hidden" name="categoryId" th:value="${currentCategoryId}">
 
                 <label class="sr-only" for="sortBy">Sort by</label>
-                <select id="sortBy" name="sortBy" class="sort-select" onchange="this.form.submit()">
-                    <option value="id" th:selected="${currentSortBy == 'id'}">Newest</option>
-                    <option value="price" th:selected="${currentSortBy == 'price'}">Price</option>
-                    <option value="name" th:selected="${currentSortBy == 'name'}">Name</option>
-                </select>
+                <div class="select-wrap">
+                    <select id="sortBy" name="sortBy" class="sort-select" onchange="this.form.submit()">
+                        <option value="id" th:selected="${currentSortBy == 'id'}">Newest</option>
+                        <option value="price" th:selected="${currentSortBy == 'price'}">Price</option>
+                        <option value="name" th:selected="${currentSortBy == 'name'}">Name</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down select-caret" aria-hidden="true"></i>
+                </div>
 
                 <label class="sr-only" for="direction">Direction</label>
-                <select id="direction" name="direction" class="sort-select" onchange="this.form.submit()">
-                    <option value="asc" th:selected="${currentDirection == 'asc'}">Ascending</option>
-                    <option value="desc" th:selected="${currentDirection == 'desc'}">Descending</option>
-                </select>
+                <div class="select-wrap">
+                    <select id="direction" name="direction" class="sort-select" onchange="this.form.submit()">
+                        <option value="asc" th:selected="${currentDirection == 'asc'}">Ascending</option>
+                        <option value="desc" th:selected="${currentDirection == 'desc'}">Descending</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down select-caret" aria-hidden="true"></i>
+                </div>
             </form>
         </div>
 
@@ -142,23 +154,23 @@
             <p th:unless="${currentSearch != null and !currentSearch.isEmpty()}">
                 No products here yet. Browse the full collection.
             </p>
-            <a href="/" class="btn btn-outline">Show all products</a>
+            <a href="/#collection" class="btn btn-outline">Show all products</a>
         </div>
 
         <nav class="pagination-container" th:if="${productPage.totalPages > 1}" aria-label="Pagination">
             <ul class="pagination">
                 <li th:classappend="${productPage.first} ? ' disabled'">
-                    <a th:href="@{/(page=${currentPage - 1}, search=${currentSearch}, categoryId=${currentCategoryId}, sortBy=${currentSortBy}, direction=${currentDirection})}">
+                    <a th:href="@{/(page=${currentPage - 1}, search=${currentSearch}, categoryId=${currentCategoryId}, sortBy=${currentSortBy}, direction=${currentDirection})} + '#collection'">
                         <i class="fa-solid fa-chevron-left"></i>
                     </a>
                 </li>
                 <li th:each="i : ${#numbers.sequence(0, productPage.totalPages - 1)}"
                     th:classappend="${i == currentPage} ? ' active'">
-                    <a th:href="@{/(page=${i}, search=${currentSearch}, categoryId=${currentCategoryId}, sortBy=${currentSortBy}, direction=${currentDirection})}"
+                    <a th:href="@{/(page=${i}, search=${currentSearch}, categoryId=${currentCategoryId}, sortBy=${currentSortBy}, direction=${currentDirection})} + '#collection'"
                        th:text="${i + 1}">1</a>
                 </li>
                 <li th:classappend="${productPage.last} ? ' disabled'">
-                    <a th:href="@{/(page=${currentPage + 1}, search=${currentSearch}, categoryId=${currentCategoryId}, sortBy=${currentSortBy}, direction=${currentDirection})}">
+                    <a th:href="@{/(page=${currentPage + 1}, search=${currentSearch}, categoryId=${currentCategoryId}, sortBy=${currentSortBy}, direction=${currentDirection})} + '#collection'">
                         <i class="fa-solid fa-chevron-right"></i>
                     </a>
                 </li>

@@ -9,6 +9,18 @@ body {
     background-color: var(--bg-main);
 }
 
+/*
+  Several elements below (.cart-status, #cart-content, .toast) set their own
+  `display` value for layout purposes. An author stylesheet rule always beats
+  the browser's built-in `[hidden] { display: none }` rule, specificity aside,
+  so without this override those elements stayed visible even with the
+  `hidden` attribute set. This one rule is what actually makes `hidden` work
+  anywhere those elements are used.
+*/
+[hidden] {
+    display: none !important;
+}
+
 /* Helpers */
 .sr-only {
     position: absolute;
@@ -32,6 +44,37 @@ select:focus-visible {
 .btn-lg {
     padding: 0.85rem 2rem;
     font-size: 1rem;
+}
+
+/* =========================================
+   Spinner (CircularProgressIndicator equivalent)
+   Sized in em against currentColor, so it drops into any
+   font-size/color context - a loading panel, a button icon, etc.
+   ========================================= */
+@keyframes ss-spin {
+    to { transform: rotate(360deg); }
+}
+
+.spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 0.15em solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    opacity: 0.85;
+    vertical-align: -0.15em;
+    animation: ss-spin 0.7s linear infinite;
+}
+
+/* A spinner communicates "still working" - slow it down for reduced-motion
+   rather than freezing it via the blanket rule below, which would make it
+   look stuck instead of calm. Higher selector specificity wins over the
+   universal rule regardless of source order. */
+@media (prefers-reduced-motion: reduce) {
+    .spinner {
+        animation-duration: 1.6s;
+    }
 }
 
 /* =========================================

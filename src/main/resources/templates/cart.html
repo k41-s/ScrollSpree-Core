@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your basket - Scroll Spree</title>
+
+    <th:block th:replace="~{fragments/layout :: head-assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/cart.css}">
+</head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('')}"></header>
+
+<main class="container cart-page">
+
+    <h1 class="cart-heading">Your basket</h1>
+
+    <div id="cart-loading" class="cart-status">Loading your basket…</div>
+
+    <div id="cart-empty" class="cart-status" hidden>
+        <i class="fa-solid fa-basket-shopping"></i>
+        <p>Your basket is empty.</p>
+        <a href="/#collection" class="btn btn-primary">Browse the collection</a>
+    </div>
+
+    <div id="cart-content" hidden>
+        <ul class="cart-list" id="cart-list"></ul>
+
+        <aside class="cart-summary">
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <strong id="cart-total">$0.00</strong>
+            </div>
+            <p class="summary-note">Shipping and taxes are calculated at checkout.</p>
+
+            <button type="button" id="checkout-btn" class="btn btn-primary btn-block btn-lg">
+                Proceed to checkout
+            </button>
+
+            <p class="guest-note" id="guest-note" hidden>
+                You are shopping as a guest. Your basket moves with you when you log in.
+            </p>
+
+            <button type="button" id="clear-cart" class="btn btn-danger-outline btn-block">
+                Clear basket
+            </button>
+        </aside>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const loadingEl = document.getElementById('cart-loading');
+        const emptyEl = document.getElementById('cart-empty');
+        const contentEl = document.getElementById('cart-content');
+        const listEl = document.getElementById('cart-list');
+        const totalEl = document.getElementById('cart-total');
+        const guestNote = document.getElementById('guest-note');
+
+        function buildRow(item) {
+            const li = document.createElement('li');
+            li.className = 'cart-item';
+
+            const media = document.createElement('div');
+            media.className = 'cart-item-media';
+            if (item.imageId) {
+                const img = document.createElement('img');
+                img.src = '/api/productimages/' + item.imageId;
+                img.alt = item.name;
+                media.append(img);
+            }
+
+            const body = document.createElement('div');
+            body.className = 'cart-item-body';
+
+            const name = document.createElement('a');
+            name.className = 'cart-item-name';
+            name.href = '/products/' + item.productId;
+            name.textContent = item.name;
+
+            const unit = document.createElement('span');
+            unit.className = 'cart-item-unit';
+            unit.textContent = ScrollSpreeCart.formatPrice(item.price) + ' each';
+
+            body.append(name, unit);
+
+            const stepper = document.createElement('div');
+            stepper.className = 'stepper';
+
+            const minus = document.createElement('button');
+            minus.type = 'button';
+            minus.setAttribute('aria-label', 'Decrease quantity');
+            minus.textContent = '−';
+            minus.addEventListener('click', () => change(item.productId, -1));
+
+            const qty = document.createElement('span');
+            qty.className = 'stepper-value';
+            qty.textContent = item.quantity;
+
+            const plus = document.createElement('button');
+            plus.type = 'button';
+            plus.setAttribute('aria-label', 'Increase quantity');
+            plus.textContent = '+';
+            plus.addEventListener('click', () => change(item.productId, 1));
+
+            stepper.append(minus, qty, plus);
+
+            const lineTotal = document.createElement('strong');
+            lineTotal.className = 'cart-item-total';
+            lineTotal.textContent = ScrollSpreeCart.formatPrice(item.price * item.quantity);
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'cart-item-remove';
+            remove.setAttribute('aria-label', 'Remove ' + item.name);
+            remove.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            remove.addEventListener('click', () => removeItem(item.productId));
+
+            li.append(media, body, stepper, lineTotal, remove);
+            return li;
+        }
+
+        function render(items) {
+            loadingEl.hidden = true;
+
+            const isEmpty = items.length === 0;
+            emptyEl.hidden = !isEmpty;
+            contentEl.hidden = isEmpty;
+            if (isEmpty) return;
+
+            listEl.textContent = '';
+            items.forEach(item => listEl.append(buildRow(item)));
+
+            totalEl.textContent = ScrollSpreeCart.formatPrice(ScrollSpreeCart.getTotal());
+            guestNote.hidden = ScrollSpreeCart.isLoggedIn();
+        }
+
+        async function change(productId, delta) {
+            try {
+                await ScrollSpreeCart.updateQuantity(productId, delta);
+            } catch (error) {
+                console.error(error);
+                ScrollSpreeCart.showToast('Could not update that item.');
+            }
+        }
+
+        async function removeItem(productId) {
+            try {
+                await ScrollSpreeCart.removeFromCart(productId);
+            } catch (error) {
+                console.error(error);
+                ScrollSpreeCart.showToast('Could not remove that item.');
+            }
+        }
+
+        ScrollSpreeCart.subscribe(render);
+
+        document.getElementById('clear-cart').addEventListener('click', async () => {
+            try {
+                await ScrollSpreeCart.clearCart();
+            } catch (error) {
+                console.error(error);
+                ScrollSpreeCart.showToast('Could not clear the basket.');
+            }
+        });
+
+        document.getElementById('checkout-btn').addEventListener('click', () => {
+            if (!ScrollSpreeCart.isLoggedIn()) {
+                ScrollSpreeCart.requireLogin('Log in to check out. Your basket comes with you.');
+                return;
+            }
+            window.location.href = '/checkout';
+        });
+    });
+</script>
+</body>
+</html>

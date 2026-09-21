@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Scroll Spree</title>
     <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/login.css">
     <script src="/js/auth.js"></script>
+    <script src="/js/cart.js"></script>
 </head>
 <body class="login-page">
 
@@ -28,6 +30,8 @@
     </form>
 </div>
 
+<div class="toast" data-toast role="status" aria-live="polite" hidden></div>
+
 <script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -47,6 +51,8 @@
 
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('refreshToken', data.refreshToken);
+
+                await ScrollSpreeCart.syncGuestCartToApi();
 
                 redirectBasedOnRole(data.token);
             } else {

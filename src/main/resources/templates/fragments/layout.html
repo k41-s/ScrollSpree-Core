@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<th:block th:fragment="head-assets">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</th:block>
+
+<header class="site-header" th:fragment="header(activeNav)">
+    <div class="container header-inner">
+
+        <a href="/" class="brand">
+            <img th:src="@{/images/ScrollSpree-header-logo.png}" alt="ScrollSpree"/>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/" th:classappend="${activeNav == 'home'} ? ' is-active'">Home</a>
+            <a href="/#collection" th:classappend="${activeNav == 'categories'} ? ' is-active'">Categories</a>
+            <a href="/#about">About</a>
+            <a href="/#footer">Contact</a>
+        </nav>
+
+        <div class="header-actions">
+
+            <form action="/" method="GET" class="header-search" role="search">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <label class="sr-only" for="header-search-input">Search products</label>
+                <input id="header-search-input" type="text" name="search" placeholder="Search"
+                       th:value="${currentSearch}">
+            </form>
+
+            <div class="country-select" aria-hidden="true">
+                <span class="flag">GB</span>
+                <span>UK</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+
+            <a href="/cart" class="icon-btn" aria-label="Basket">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="cart-count" data-cart-count hidden>0</span>
+            </a>
+
+            <a href="/auth/login" class="icon-btn" data-auth-link aria-label="Sign in">
+                <i class="fa-regular fa-user"></i>
+            </a>
+        </div>
+    </div>
+</header>
+
+<footer class="site-footer" id="footer" th:fragment="footer">
+    <div class="container footer-inner">
+
+        <div class="footer-brand">
+            <img th:src="@{/images/ScrollSpree-header-logo.png}" alt="ScrollSpree"/>
+        </div>
+
+        <div class="footer-col">
+            <h4>Quick links</h4>
+            <ul>
+                <li><a href="/#about">About us</a></li>
+                <li><a href="/#collection">Products</a></li>
+                <li><a href="/#collection">Categories</a></li>
+                <li><a href="/cart">Your basket</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h4>Customer service</h4>
+            <ul>
+                <li><a href="/#footer">Help centre</a></li>
+                <li><a href="/#footer">Shipping info</a></li>
+                <li><a href="/#footer">Returns &amp; exchanges</a></li>
+                <li><a href="/#footer">Size guide</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-contact">
+            <a class="contact-pill" href="mailto:kaishomeinbox@gmail.com">
+                <i class="fa-solid fa-envelope"></i>
+                <span>kaishomeinbox@gmail.com</span>
+            </a>
+            <div class="socials">
+                <a href="/#footer" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="/#footer" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="/#footer" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <p class="footer-note">Subscribe to our newsletter for exclusive deals and updates.</p>
+</footer>
+
+<th:block th:fragment="scripts">
+    <div class="toast" data-toast role="status" aria-live="polite" hidden></div>
+    <script th:src="@{/js/auth.js}"></script>
+    <script th:src="@{/js/cart.js}"></script>
+</th:block>
+
+</body>
+</html>

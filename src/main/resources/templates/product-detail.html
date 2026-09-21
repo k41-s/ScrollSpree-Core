@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.name} + ' - Scroll Spree'">Product - Scroll Spree</title>
+
+    <th:block th:replace="~{fragments/layout :: head-assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/product.css}">
+</head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('categories')}"></header>
+
+<main class="container product-page">
+
+    <a href="/" class="back-link">
+        <i class="fa-solid fa-chevron-left"></i> Back to collection
+    </a>
+
+    <div class="product-detail">
+
+        <div class="gallery">
+            <div class="gallery-main">
+                <img th:if="${not #lists.isEmpty(product.imageIds)}"
+                     id="gallery-main-image"
+                     th:src="@{/api/productimages/{imageId}(imageId=${product.imageIds[0]})}"
+                     th:alt="${product.name}">
+                <div class="gallery-empty" th:if="${#lists.isEmpty(product.imageIds)}">
+                    <i class="fa-regular fa-image"></i>
+                </div>
+            </div>
+
+            <div class="gallery-thumbs" th:if="${#lists.size(product.imageIds) > 1}">
+                <button type="button"
+                        class="thumb"
+                        th:each="imageId, iter : ${product.imageIds}"
+                        th:classappend="${iter.first} ? ' is-active'"
+                        th:attr="data-src=@{/api/productimages/{imageId}(imageId=${imageId})}">
+                    <img th:src="@{/api/productimages/{imageId}(imageId=${imageId})}" alt="" loading="lazy">
+                </button>
+            </div>
+        </div>
+
+        <div class="product-info">
+            <span class="detail-category" th:text="${product.categoryName}">Category</span>
+            <h1 class="detail-title" th:text="${product.name}">Product name</h1>
+
+            <p class="detail-price"
+               th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">$0.00</p>
+
+            <p class="detail-description" th:text="${product.description}">Description</p>
+
+            <div class="detail-countries" th:if="${not #lists.isEmpty(product.countryNames)}">
+                <h2>Ships to</h2>
+                <ul>
+                    <li th:each="country : ${product.countryNames}" th:text="${country}">Country</li>
+                </ul>
+            </div>
+
+            <div class="detail-actions">
+                <button type="button"
+                        id="add-to-basket"
+                        class="btn btn-outline btn-lg"
+                        th:attr="data-product-id=${product.id},
+                                 data-product-name=${product.name},
+                                 data-product-price=${product.price},
+                                 data-image-id=${#lists.isEmpty(product.imageIds) ? null : product.imageIds[0]}">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="label">Add to basket</span>
+                </button>
+
+                <button type="button"
+                        id="buy-now"
+                        class="btn btn-primary btn-lg"
+                        th:attr="data-product-id=${product.id}">
+                    Buy now
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const mainImage = document.getElementById('gallery-main-image');
+        document.querySelectorAll('.thumb').forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                if (!mainImage) return;
+                mainImage.src = thumb.dataset.src;
+                document.querySelectorAll('.thumb').forEach(t => t.classList.remove('is-active'));
+                thumb.classList.add('is-active');
+            });
+        });
+
+        const addBtn = document.getElementById('add-to-basket');
+        if (addBtn) {
+            addBtn.addEventListener('click', async () => {
+                const product = {
+                    id: Number(addBtn.dataset.productId),
+                    name: addBtn.dataset.productName,
+                    price: Number(addBtn.dataset.productPrice),
+                    imageId: addBtn.dataset.imageId ? Number(addBtn.dataset.imageId) : null
+                };
+
+                const labelEl = addBtn.querySelector('.label');
+                const original = labelEl.textContent;
+                addBtn.disabled = true;
+                labelEl.textContent = 'Adding…';
+
+                try {
+                    await ScrollSpreeCart.addToCart(product, 1);
+                    labelEl.textContent = 'Added';
+                    ScrollSpreeCart.showToast(product.name + ' added to your basket.', {
+                        label: 'View basket',
+                        onClick: () => { window.location.href = '/cart'; }
+                    });
+                } catch (error) {
+                    console.error('Add to basket failed:', error);
+                    ScrollSpreeCart.showToast('That did not go through. Try again.');
+                } finally {
+                    setTimeout(() => {
+                        labelEl.textContent = original;
+                        addBtn.disabled = false;
+                    }, 1500);
+                }
+            });
+        }
+
+        const buyBtn = document.getElementById('buy-now');
+        if (buyBtn) {
+            buyBtn.addEventListener('click', () => {
+                if (!ScrollSpreeCart.isLoggedIn()) {
+                    ScrollSpreeCart.requireLogin();
+                    return;
+                }
+                window.location.href = '/checkout?productId=' + buyBtn.dataset.productId;
+            });
+        }
+    });
+</script>
+</body>
+</html>

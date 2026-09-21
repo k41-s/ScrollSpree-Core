@@ -37,14 +37,14 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/auth/login", "/admin/**", "/images/**", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/", "/products/**", "/cart", "/error", "/favicon.ico", "/auth/login", "/admin/**", "/images/**", "/css/**", "/js/**").permitAll()
                         .requestMatchers(
                                 "/api/webhooks/paypal",
                                 "/payment/success",
                                 "/payment/cancel"
                         ).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/api/productimages/**").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",

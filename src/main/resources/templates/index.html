@@ -1,11 +1,175 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>ScrollSpree - Homepage</title>
-    <link rel="stylesheet" href="../static/css/main.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scroll Spree - Home</title>
+
+    <th:block th:replace="~{fragments/layout :: head-assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
 </head>
 <body>
-    <h1>SCROLLSPREE Homepage content coming soon!</h1>
+
+<header th:replace="~{fragments/layout :: header('home')}"></header>
+
+<main>
+
+    <section class="hero container" id="about">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="word-outline">Where</span>
+                <span class="word-solid">Digital</span>
+                <span class="word-solid">Meets</span>
+                <span class="word-outline">Fashion</span>
+            </h1>
+
+            <p class="hero-lede">
+                Discover the perfect blend of contemporary design and timeless elegance.
+                Shop our curated collection, available worldwide.
+            </p>
+
+            <div class="hero-actions">
+                <a href="#collection" class="btn btn-primary btn-hero">
+                    Shop looks <i class="fa-solid fa-chevron-right"></i>
+                </a>
+                <a href="#collection" class="btn btn-outline-light btn-hero">View look ideas</a>
+            </div>
+
+            <ul class="hero-stats">
+                <li>
+                    <strong>50K+</strong>
+                    <span>Global customers</span>
+                </li>
+                <li>
+                    <strong th:text="${productPage.totalElements} + '+'">1000+</strong>
+                    <span>Premium products</span>
+                </li>
+                <li>
+                    <strong>7</strong>
+                    <span>Countries</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="hero-collage" aria-hidden="true">
+            <figure class="tile tile-lead"><img th:src="@{/images/hero-look-1.jpg}" alt="" onerror="this.remove()"></figure>
+            <figure class="tile tile-top"><img th:src="@{/images/hero-look-2.jpg}" alt="" onerror="this.remove()"></figure>
+            <figure class="tile tile-side"><img th:src="@{/images/hero-look-3.jpg}" alt="" onerror="this.remove()"></figure>
+            <figure class="tile tile-foot"><img th:src="@{/images/hero-look-4.jpg}" alt="" onerror="this.remove()"></figure>
+        </div>
+    </section>
+
+    <section class="collection container" id="collection">
+
+        <h2 class="section-title">Summer collection</h2>
+
+        <div class="filter-bar">
+            <nav class="category-pills">
+                <a class="pill"
+                   th:classappend="${currentCategoryId == null} ? ' is-active'"
+                   th:href="@{/(search=${currentSearch}, sortBy=${currentSortBy}, direction=${currentDirection})}">
+                    All
+                </a>
+                <a th:each="cat : ${categories}"
+                   class="pill"
+                   th:classappend="${cat.id == currentCategoryId} ? ' is-active'"
+                   th:href="@{/(categoryId=${cat.id}, search=${currentSearch}, sortBy=${currentSortBy}, direction=${currentDirection})}"
+                   th:text="${cat.name}">Category</a>
+            </nav>
+
+            <form action="/" method="GET" class="sort-form">
+                <input type="hidden" name="search" th:value="${currentSearch}">
+                <input type="hidden" name="categoryId" th:value="${currentCategoryId}">
+
+                <label class="sr-only" for="sortBy">Sort by</label>
+                <select id="sortBy" name="sortBy" class="sort-select" onchange="this.form.submit()">
+                    <option value="id" th:selected="${currentSortBy == 'id'}">Newest</option>
+                    <option value="price" th:selected="${currentSortBy == 'price'}">Price</option>
+                    <option value="name" th:selected="${currentSortBy == 'name'}">Name</option>
+                </select>
+
+                <label class="sr-only" for="direction">Direction</label>
+                <select id="direction" name="direction" class="sort-select" onchange="this.form.submit()">
+                    <option value="asc" th:selected="${currentDirection == 'asc'}">Ascending</option>
+                    <option value="desc" th:selected="${currentDirection == 'desc'}">Descending</option>
+                </select>
+            </form>
+        </div>
+
+        <div class="product-grid" th:if="${not #lists.isEmpty(products)}">
+            <article class="product-card" th:each="product : ${products}">
+
+                <a class="product-link" th:href="@{/products/{id}(id=${product.id})}">
+                    <div class="product-media">
+                        <img th:if="${not #lists.isEmpty(product.imageIds)}"
+                             th:src="@{/api/productimages/{imageId}(imageId=${product.imageIds[0]})}"
+                             th:alt="${product.name}"
+                             loading="lazy">
+                        <div class="product-media-empty" th:if="${#lists.isEmpty(product.imageIds)}">
+                            <i class="fa-regular fa-image"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <div class="product-body">
+                    <a class="product-link" th:href="@{/products/{id}(id=${product.id})}">
+                        <h3 class="product-title" th:text="${product.name}">Product name</h3>
+                    </a>
+
+                    <span class="product-category" th:text="${product.categoryName}">Category</span>
+
+                    <p class="product-price"
+                       th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">$0.00</p>
+
+                    <button type="button"
+                            class="btn btn-primary btn-block add-to-basket"
+                            th:attr="data-product-id=${product.id},
+                                     data-product-name=${product.name},
+                                     data-product-price=${product.price},
+                                     data-image-id=${#lists.isEmpty(product.imageIds) ? null : product.imageIds[0]}">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span class="label">Add to basket</span>
+                    </button>
+                </div>
+            </article>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(products)}">
+            <i class="fa-regular fa-compass"></i>
+            <p th:if="${currentSearch != null and !currentSearch.isEmpty()}">
+                Nothing matches &ldquo;<span th:text="${currentSearch}">query</span>&rdquo;. Try a different word or browse everything.
+            </p>
+            <p th:unless="${currentSearch != null and !currentSearch.isEmpty()}">
+                No products here yet. Browse the full collection.
+            </p>
+            <a href="/" class="btn btn-outline">Show all products</a>
+        </div>
+
+        <nav class="pagination-container" th:if="${productPage.totalPages > 1}" aria-label="Pagination">
+            <ul class="pagination">
+                <li th:classappend="${productPage.first} ? ' disabled'">
+                    <a th:href="@{/(page=${currentPage - 1}, search=${currentSearch}, categoryId=${currentCategoryId}, sortBy=${currentSortBy}, direction=${currentDirection})}">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </a>
+                </li>
+                <li th:each="i : ${#numbers.sequence(0, productPage.totalPages - 1)}"
+                    th:classappend="${i == currentPage} ? ' active'">
+                    <a th:href="@{/(page=${i}, search=${currentSearch}, categoryId=${currentCategoryId}, sortBy=${currentSortBy}, direction=${currentDirection})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li th:classappend="${productPage.last} ? ' disabled'">
+                    <a th:href="@{/(page=${currentPage + 1}, search=${currentSearch}, categoryId=${currentCategoryId}, sortBy=${currentSortBy}, direction=${currentDirection})}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/home.js}"></script>
 </body>
 </html>

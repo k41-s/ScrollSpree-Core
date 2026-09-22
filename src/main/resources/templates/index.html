@@ -52,10 +52,10 @@
         </div>
 
         <div class="hero-collage" aria-hidden="true">
-            <figure class="tile tile-lead"><img th:src="@{/images/hero-look-1.jpg}" alt="" onerror="this.remove()"></figure>
-            <figure class="tile tile-top"><img th:src="@{/images/hero-look-2.jpg}" alt="" onerror="this.remove()"></figure>
-            <figure class="tile tile-side"><img th:src="@{/images/hero-look-3.jpg}" alt="" onerror="this.remove()"></figure>
-            <figure class="tile tile-foot"><img th:src="@{/images/hero-look-4.jpg}" alt="" onerror="this.remove()"></figure>
+            <figure class="tile tile-lead"><img th:src="@{/images/hero-1.png}" alt="" onerror="this.remove()"></figure>
+            <figure class="tile tile-top"><img th:src="@{/images/hero-2.png}" alt="" onerror="this.remove()"></figure>
+            <figure class="tile tile-side"><img th:src="@{/images/hero-3.png}" alt="" onerror="this.remove()"></figure>
+            <figure class="tile tile-foot"><img th:src="@{/images/hero-4.png}" alt="" onerror="this.remove()"></figure>
         </div>
     </section>
 
@@ -65,12 +65,6 @@
 
         <div class="filter-bar">
             <nav class="category-pills">
-                <!--
-                  '#collection' appended to every filter/sort/pagination link on this
-                  page: full reloads are the "if it's not worth AJAX, at least land back
-                  where the person was" trade-off - cheap, and the browser handles the
-                  scroll restoration for free once the fragment is in the URL.
-                -->
                 <a class="pill"
                    th:classappend="${currentCategoryId == null} ? ' is-active'"
                    th:href="@{/(search=${currentSearch}, sortBy=${currentSortBy}, direction=${currentDirection})} + '#collection'">

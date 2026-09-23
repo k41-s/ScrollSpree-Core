@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Scroll Spree</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <script src="/js/auth.js"></script>
+    <script src="/js/cart.js"></script>
+</head>
+<body class="login-page">
+
+<div class="login-card">
+    <h2 class="login-title">Register</h2>
+
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" class="form-control" placeholder="Username" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" class="form-control" placeholder="Password" required>
+        </div>
+        <div class="form-group">
+            <label for="repeatPassword" class="form-label">Repeat password</label>
+            <input type="password" id="repeatPassword" class="form-control" placeholder="Repeat password" required>
+        </div>
+
+        <div class="form-group">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" id="name" class="form-control" placeholder="Name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="surname" class="form-label">Surname</label>
+            <input type="text" id="surname" class="form-control" placeholder="Surname" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" class="form-control" placeholder="Email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone" class="form-label">Phone</label>
+            <input type="number" id="phone" class="form-control" placeholder="Phone" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Register</button>
+    </form>
+
+    <div class="go-to-reg-container">
+        <a th:href="@{/auth/login}" class="go-to-register">Already have an account? Login here.</a>
+    </div>
+</div>
+
+
+<div class="toast" data-toast role="status" aria-live="polite" hidden></div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const repeatPass = document.getElementById('repeatPassword').value;
+        const name = document.getElementById('name').value;
+        const surname = document.getElementById('surname').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+
+        if (password !== repeatPass) {
+            alert('Passwords don\'t match');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, name, surname, role: "USER", email, phone})
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('refreshToken', data.refreshToken);
+
+                await ScrollSpreeCart.syncGuestCartToApi();
+
+                redirectBasedOnRole(data.token);
+            } else {
+                alert("Registration Failed");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred during registration.");
+        }
+    });
+</script>
+
+</body>
+</html>

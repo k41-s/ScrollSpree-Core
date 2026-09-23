@@ -37,7 +37,7 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/products/**", "/cart", "/error", "/favicon.ico", "/auth/login", "/admin/**", "/images/**", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/", "/products/**", "/cart", "/error", "/favicon.ico", "/auth/**", "/admin/**", "/images/**", "/css/**", "/js/**").permitAll()
                         .requestMatchers(
                                 "/api/webhooks/paypal",
                                 "/payment/success",

@@ -7,23 +7,24 @@
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/login.css">
-    <script src="/js/auth.js"></script>
-    <script src="/js/cart.js"></script>
 </head>
 <body class="login-page">
 
 <div class="login-card">
     <h2 class="login-title">Login</h2>
 
-    <form id="loginForm">
+    <!-- Error message display -->
+    <div th:if="${error}" class="alert alert-danger" style="color: red; margin-bottom: 1rem;" th:text="${error}"></div>
+
+    <form th:action="@{/auth/login}" th:object="${loginDto}" method="POST">
         <div class="form-group">
             <label for="username" class="form-label">Username</label>
-            <input type="text" id="username" class="form-control" placeholder="Enter username" required>
+            <input type="text" id="username" th:field="*{username}" class="form-control" placeholder="Enter username" required>
         </div>
 
         <div class="form-group">
             <label for="password" class="form-label">Password</label>
-            <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+            <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="Enter password" required>
         </div>
 
         <button type="submit" class="btn btn-primary btn-block">Login</button>
@@ -34,39 +35,5 @@
     </div>
 </div>
 
-<div class="toast" data-toast role="status" aria-live="polite" hidden></div>
-
-<script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-
-        try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('refreshToken', data.refreshToken);
-
-                await ScrollSpreeCart.syncGuestCartToApi();
-
-                redirectBasedOnRole(data.token);
-            } else {
-                alert("Login Failed: Invalid credentials");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            alert("An error occurred during login.");
-        }
-    });
-</script>
 </body>
 </html>

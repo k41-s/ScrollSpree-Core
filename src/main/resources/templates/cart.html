@@ -16,38 +16,74 @@
 
     <h1 class="cart-heading">Your basket</h1>
 
-    <div id="cart-loading" class="cart-status">
-        <span class="spinner" aria-hidden="true"></span>
-        <p>Loading your basket…</p>
-    </div>
-
-    <div id="cart-empty" class="cart-status" hidden>
+    <!-- Empty Basket State -->
+    <div id="cart-empty" class="cart-status" th:if="${cart == null or #lists.isEmpty(cart.items)}">
         <i class="fa-solid fa-basket-shopping"></i>
         <p>Your basket is empty.</p>
         <a href="/#collection" class="btn btn-primary">Browse the collection</a>
     </div>
 
-    <div id="cart-content" hidden>
-        <ul class="cart-list" id="cart-list"></ul>
+    <!-- Active Basket State -->
+    <div id="cart-content" th:if="${cart != null and not #lists.isEmpty(cart.items)}">
+        <ul class="cart-list">
+            <li class="cart-item" th:each="item : ${cart.items}">
 
+                <!-- Product Media -->
+                <div class="cart-item-media">
+                    <img th:if="${item.product.imageIds != null and not #lists.isEmpty(item.product.imageIds)}"
+                         th:src="@{/api/productimages/{imageId}(imageId=${item.product.imageIds[0]})}"
+                         th:alt="${item.product.name}">
+                    <div class="product-media-empty" th:if="${item.product.imageIds == null or #lists.isEmpty(item.product.imageIds)}">
+                        <i class="fa-regular fa-image"></i>
+                    </div>
+                </div>
+
+                <!-- Product Body -->
+                <div class="cart-item-body">
+                    <a class="cart-item-name" th:href="@{/products/{id}(id=${item.product.id})}" th:text="${item.product.name}">Product name</a>
+                    <span class="cart-item-unit" th:text="'$' + ${#numbers.formatDecimal(item.product.price, 1, 2)} + ' each'">$0.00 each</span>
+                </div>
+
+                <!-- Quantity Stepper Form -->
+                <form th:action="@{/cart/update}" method="post" class="stepper-form">
+                    <input type="hidden" name="productId" th:value="${item.product.id}"/>
+                    <div class="stepper">
+                        <button type="submit" name="quantity" th:value="${item.quantity - 1}" class="stepper-btn" aria-label="Decrease quantity">−</button>
+                        <span class="stepper-value" th:text="${item.quantity}">1</span>
+                        <button type="submit" name="quantity" th:value="${item.quantity + 1}" class="stepper-btn" aria-label="Increase quantity">+</button>
+                    </div>
+                </form>
+
+                <!-- Line Total -->
+                <strong class="cart-item-total" th:text="'$' + ${#numbers.formatDecimal(item.product.price * item.quantity, 1, 2)}">$0.00</strong>
+
+                <!-- Remove Item Form -->
+                <form th:action="@{/cart/remove}" method="post">
+                    <input type="hidden" name="productId" th:value="${item.product.id}"/>
+                    <button type="submit" class="cart-item-remove" th:attr="aria-label='Remove ' + ${item.product.name}">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </form>
+            </li>
+        </ul>
+
+        <!-- Summary Sidebar -->
         <aside class="cart-summary">
             <div class="summary-row">
                 <span>Subtotal</span>
-                <strong id="cart-total">$0.00</strong>
+                <strong th:text="'$' + ${#numbers.formatDecimal(cart.totalPrice, 1, 2)}">$0.00</strong>
             </div>
             <p class="summary-note">Shipping and taxes are calculated at checkout.</p>
 
-            <button type="button" id="checkout-btn" class="btn btn-primary btn-block btn-lg">
+            <a href="/checkout" class="btn btn-primary btn-block btn-lg">
                 Proceed to checkout
-            </button>
+            </a>
 
-            <p class="guest-note" id="guest-note" hidden>
-                You are shopping as a guest. Your basket moves with you when you log in.
-            </p>
-
-            <button type="button" id="clear-cart" class="btn btn-danger-outline btn-block">
-                Clear basket
-            </button>
+            <form th:action="@{/cart/clear}" method="post" style="margin-top: 12px;">
+                <button type="submit" class="btn btn-danger-outline btn-block">
+                    Clear basket
+                </button>
+            </form>
         </aside>
     </div>
 </main>
@@ -55,141 +91,5 @@
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-
-        const loadingEl = document.getElementById('cart-loading');
-        const emptyEl = document.getElementById('cart-empty');
-        const contentEl = document.getElementById('cart-content');
-        const listEl = document.getElementById('cart-list');
-        const totalEl = document.getElementById('cart-total');
-        const guestNote = document.getElementById('guest-note');
-
-        function buildRow(item) {
-            const li = document.createElement('li');
-            li.className = 'cart-item';
-
-            const media = document.createElement('div');
-            media.className = 'cart-item-media';
-            if (item.imageId) {
-                const img = document.createElement('img');
-                img.src = '/api/productimages/' + item.imageId;
-                img.alt = item.name;
-                media.append(img);
-            }
-
-            const body = document.createElement('div');
-            body.className = 'cart-item-body';
-
-            const name = document.createElement('a');
-            name.className = 'cart-item-name';
-            name.href = '/products/' + item.productId;
-            name.textContent = item.name;
-
-            const unit = document.createElement('span');
-            unit.className = 'cart-item-unit';
-            unit.textContent = ScrollSpreeCart.formatPrice(item.price) + ' each';
-
-            body.append(name, unit);
-
-            const stepper = document.createElement('div');
-            stepper.className = 'stepper';
-
-            const minus = document.createElement('button');
-            minus.type = 'button';
-            minus.setAttribute('aria-label', 'Decrease quantity');
-            minus.textContent = '−';
-            minus.addEventListener('click', () => change(item.productId, -1));
-
-            const qty = document.createElement('span');
-            qty.className = 'stepper-value';
-            qty.textContent = item.quantity;
-
-            const plus = document.createElement('button');
-            plus.type = 'button';
-            plus.setAttribute('aria-label', 'Increase quantity');
-            plus.textContent = '+';
-            plus.addEventListener('click', () => change(item.productId, 1));
-
-            stepper.append(minus, qty, plus);
-
-            const lineTotal = document.createElement('strong');
-            lineTotal.className = 'cart-item-total';
-            lineTotal.textContent = ScrollSpreeCart.formatPrice(item.price * item.quantity);
-
-            const remove = document.createElement('button');
-            remove.type = 'button';
-            remove.className = 'cart-item-remove';
-            remove.setAttribute('aria-label', 'Remove ' + item.name);
-            remove.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-            remove.addEventListener('click', () => removeItem(item.productId));
-
-            li.append(media, body, stepper, lineTotal, remove);
-            return li;
-        }
-
-        function render(items) {
-            loadingEl.hidden = true;
-
-            // Cleared unconditionally: this used to sit after the empty-state
-            // early return below, so clearing the basket left the old <li>
-            // rows sitting in the DOM under #cart-content - invisible only
-            // because contentEl.hidden happened to be set alongside them.
-            listEl.textContent = '';
-
-            const isEmpty = items.length === 0;
-            emptyEl.hidden = !isEmpty;
-            contentEl.hidden = isEmpty;
-            if (isEmpty) return;
-
-            items.forEach(item => listEl.append(buildRow(item)));
-
-            totalEl.textContent = ScrollSpreeCart.formatPrice(ScrollSpreeCart.getTotal());
-            guestNote.hidden = ScrollSpreeCart.isLoggedIn();
-        }
-
-        async function change(productId, delta) {
-            try {
-                await ScrollSpreeCart.updateQuantity(productId, delta);
-            } catch (error) {
-                console.error(error);
-                ScrollSpreeCart.showToast('Could not update that item.');
-            }
-        }
-
-        async function removeItem(productId) {
-            try {
-                await ScrollSpreeCart.removeFromCart(productId);
-            } catch (error) {
-                console.error(error);
-                ScrollSpreeCart.showToast('Could not remove that item.');
-            }
-        }
-
-        // subscribe() invokes its listener immediately with whatever cartItems
-        // holds right now. Called this early, that's still the pre-fetch []
-        // default, so render() would show "basket is empty" for a moment even
-        // when it isn't. Waiting for the real fetch to land first (ready)
-        // means render()'s first call always reflects the actual basket.
-        ScrollSpreeCart.ready.then(() => ScrollSpreeCart.subscribe(render));
-
-        document.getElementById('clear-cart').addEventListener('click', async () => {
-            try {
-                await ScrollSpreeCart.clearCart();
-            } catch (error) {
-                console.error(error);
-                ScrollSpreeCart.showToast('Could not clear the basket.');
-            }
-        });
-
-        document.getElementById('checkout-btn').addEventListener('click', () => {
-            if (!ScrollSpreeCart.isLoggedIn()) {
-                ScrollSpreeCart.requireLogin('Log in to check out. Your basket comes with you.');
-                return;
-            }
-            window.location.href = '/checkout';
-        });
-    });
-</script>
 </body>
 </html>

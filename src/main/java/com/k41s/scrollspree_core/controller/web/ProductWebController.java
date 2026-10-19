@@ -23,9 +23,4 @@ public class ProductWebController {
             return "redirect:/";
         }
     }
-
-    @GetMapping("/cart")
-    public String cart() {
-        return "cart";
-    }
 }

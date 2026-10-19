@@ -127,15 +127,14 @@
                     <p class="product-price"
                        th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">$0.00</p>
 
-                    <button type="button"
-                            class="btn btn-primary btn-block add-to-basket"
-                            th:attr="data-product-id=${product.id},
-                                     data-product-name=${product.name},
-                                     data-product-price=${product.price},
-                                     data-image-id=${#lists.isEmpty(product.imageIds) ? null : product.imageIds[0]}">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        <span class="label">Add to basket</span>
-                    </button>
+                    <form th:action="@{/cart/add}" method="post">
+                        <input type="hidden" name="productId" th:value="${product.id}"/>
+                        <input type="hidden" name="quantity" value="1"/>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <span class="label">Add to basket</span>
+                        </button>
+                    </form>
                 </div>
             </article>
         </div>

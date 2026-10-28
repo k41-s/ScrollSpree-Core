@@ -20,6 +20,7 @@
 
     <div class="product-detail">
 
+        <!-- Image Gallery -->
         <div class="gallery">
             <div class="gallery-main">
                 <img th:if="${not #lists.isEmpty(product.imageIds)}"
@@ -42,6 +43,7 @@
             </div>
         </div>
 
+        <!-- Product Details -->
         <div class="product-info">
             <span class="detail-category" th:text="${product.categoryName}">Category</span>
             <h1 class="detail-title" th:text="${product.name}">Product name</h1>
@@ -59,23 +61,19 @@
             </div>
 
             <div class="detail-actions">
-                <button type="button"
-                        id="add-to-basket"
-                        class="btn btn-outline btn-lg"
-                        th:attr="data-product-id=${product.id},
-                                 data-product-name=${product.name},
-                                 data-product-price=${product.price},
-                                 data-image-id=${#lists.isEmpty(product.imageIds) ? null : product.imageIds[0]}">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <span class="label">Add to basket</span>
-                </button>
+                <form th:action="@{/cart/add}" method="post">
+                    <input type="hidden" name="productId" th:value="${product.id}"/>
+                    <input type="hidden" name="quantity" value="1"/>
+                    <button type="submit" class="btn btn-outline btn-lg">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span class="label">Add to basket</span>
+                    </button>
+                </form>
 
-                <button type="button"
-                        id="buy-now"
-                        class="btn btn-primary btn-lg"
-                        th:attr="data-product-id=${product.id}">
+                <!-- Direct Checkout Link / Action -->
+                <a th:href="@{/checkout(productId=${product.id})}" class="btn btn-primary btn-lg">
                     Buy now
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -84,9 +82,9 @@
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-
         const mainImage = document.getElementById('gallery-main-image');
         document.querySelectorAll('.thumb').forEach(thumb => {
             thumb.addEventListener('click', () => {
@@ -96,54 +94,6 @@
                 thumb.classList.add('is-active');
             });
         });
-
-        const addBtn = document.getElementById('add-to-basket');
-        if (addBtn) {
-            addBtn.addEventListener('click', async () => {
-                const product = {
-                    id: Number(addBtn.dataset.productId),
-                    name: addBtn.dataset.productName,
-                    price: Number(addBtn.dataset.productPrice),
-                    imageId: addBtn.dataset.imageId ? Number(addBtn.dataset.imageId) : null
-                };
-
-                const labelEl = addBtn.querySelector('.label');
-                const original = labelEl.textContent;
-                addBtn.disabled = true;
-                ScrollSpreeCart.setButtonBusy(addBtn, true);
-                labelEl.textContent = 'Adding…';
-
-                try {
-                    await ScrollSpreeCart.addToCart(product, 1);
-                    ScrollSpreeCart.setButtonBusy(addBtn, false);
-                    labelEl.textContent = 'Added';
-                    ScrollSpreeCart.showToast(product.name + ' added to your basket.', {
-                        label: 'View basket',
-                        onClick: () => { window.location.href = '/cart'; }
-                    });
-                } catch (error) {
-                    console.error('Add to basket failed:', error);
-                    ScrollSpreeCart.setButtonBusy(addBtn, false);
-                    ScrollSpreeCart.showToast('That did not go through. Try again.');
-                } finally {
-                    setTimeout(() => {
-                        labelEl.textContent = original;
-                        addBtn.disabled = false;
-                    }, 1500);
-                }
-            });
-        }
-
-        const buyBtn = document.getElementById('buy-now');
-        if (buyBtn) {
-            buyBtn.addEventListener('click', () => {
-                if (!ScrollSpreeCart.isLoggedIn()) {
-                    ScrollSpreeCart.requireLogin();
-                    return;
-                }
-                window.location.href = '/checkout?productId=' + buyBtn.dataset.productId;
-            });
-        }
     });
 </script>
 </body>
